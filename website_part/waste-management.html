@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EcoTrack Waste Management System</title>
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --secondary: #388e3c;
+            --accent: #81c784;
+            --light: #e8f5e9;
+            --dark: #1b5e20;
+            --warning: #ff9800;
+            --danger: #f44336;
+            --success: #4caf50;
+            --gray: #757575;
+            --shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background-color: #f5f5f5;
+            color: #333;
+            line-height: 1.6;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        
+        /* Header Styles */
+        header {
+            background-color: var(--primary);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: var(--shadow);
+        }
+        
+        .navbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+        
+        .logo i {
+            font-size: 1.8rem;
+        }
+        
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 20px;
+        }
+        
+        .nav-links a {
+            color: white;
+            text-decoration: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .nav-links a:hover {
+            background-color: var(--secondary);
+        }
+        
+        .mobile-menu {
+            display: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+        
+        /* Main Content Styles */
+        main {
+            padding: 2rem 0;
+            min-height: calc(100vh - 180px);
+        }
+        
+        .dashboard {
+            display: grid;
+            grid-template-columns: 1fr 3fr;
+            gap: 20px;
+        }
+        
+        /* Sidebar Styles */
+        .sidebar {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .menu-list {
+            list-style: none;
+        }
+        
+        .menu-list li {
+            margin-bottom: 10px;
+        }
+        
+        .menu-list a {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--dark);
+            text-decoration: none;
+            padding: 0.75rem;
+            border-radius: 4px;
+            transition: background-color 0.3s;
+        }
+        
+        .menu-list a:hover, .menu-list a.active {
+            background-color: var(--light);
+            color: var(--primary);
+        }
+        
+        /* Content Area Styles */
+        .content {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .stats-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 20px;
+        }
+        
+        .stat-card {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .stat-card .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .stat-card .title {
+            font-weight: 600;
+            color: var(--gray);
+        }
+        
+        .stat-card .icon {
+            background-color: var(--light);
+            color: var(--primary);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: grid;
+            place-items: center;
+            font-size: 1.2rem;
+        }
+        
+        .stat-card .value {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .stat-card .change {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .positive {
+            color: var(--success);
+        }
+        
+        .negative {
+            color: var(--danger);
+        }
+        
+        /* Data Table Styles */
+        .data-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .data-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .data-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--dark);
+        }
+        
+        .data-actions {
+            display: flex;
+            gap: 10px;
+        }
+        
+        .btn {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            transition: background-color 0.3s;
+        }
+        
+        .btn:hover {
+            background-color: var(--dark);
+        }
+        
+        .btn-outline {
+            background-color: transparent;
+            color: var(--primary);
+            border: 1px solid var(--primary);
+        }
+        
+        .btn-outline:hover {
+            background-color: var(--light);
+        }
+        
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        thead {
+            background-color: var(--light);
+        }
+        
+        th, td {
+            padding: 0.75rem 1rem;
+            text-align: left;
+        }
+        
+        th {
+            font-weight: 600;
+            color: var(--dark);
+        }
+        
+        tbody tr {
+            border-bottom: 1px solid #eee;
+            transition: background-color 0.3s;
+        }
+        
+        tbody tr:hover {
+            background-color: #f9f9f9;
+        }
+        
+        .status {
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 500;
+        }
+        
+        .status-pending {
+            background-color: #fff3e0;
+            color: var(--warning);
+        }
+        
+        .status-completed {
+            background-color: #e8f5e9;
+            color: var(--success);
+        }
+        
+        .status-failed {
+            background-color: #ffebee;
+            color: var(--danger);
+        }
+        
+        .action-cell {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .action-btn {
+            background-color: transparent;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 4px;
+            display: grid;
+            place-items: center;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        .action-btn:hover {
+            background-color: var(--light);
+        }
+        
+        /* Form Styles */
+        .form-container {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--shadow);
+        }
+        
+        .form-title {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: var(--dark);
+            margin-bottom: 1.5rem;
+        }
+        
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 1rem;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: var(--dark);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .form-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 1.5rem;
+        }
+        
+        /* API Response Display Styles */
+        .api-response {
+            background-color: #f5f5f5;
+            border-radius: 4px;
+            padding: 1rem;
+            margin-top: 1rem;
+            overflow-x: auto;
+        }
+        
+        .api-response pre {
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+        
+        /* Footer Styles */
+        footer {
+            background-color: var(--dark);
+            color: white;
+            padding: 1.5rem 0;
+            text-align: center;
+        }
+        
+        .footer-content {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        /* Loader Styles */
+        .loader-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            display: none;
+        }
+        
+        .loader {
+            width: 50px;
+            height: 50px;
+            border: 5px solid var(--light);
+            border-top: 5px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        /* Responsive Styles */
+        @media (max-width: 768px) {
+            .dashboard {
+                grid-template-columns: 1fr;
+            }
+            
+            .nav-links {
+                display: none;
+            }
+            
+            .mobile-menu {
+                display: block;
+            }
+            
+            .form-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Loader -->
+    <div class="loader-container" id="loaderContainer">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <div class="logo">
+                    <i class="fas fa-recycle"></i>
+                    <span>EcoTrack</span>
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#" class="active">Dashboard</a></li>
+                    <li><a href="#">Collections</a></li>
+                    <li><a href="#">Analytics</a></li>
+                    <li><a href="#">Reports</a></li>
+                    <li><a href="#">Settings</a></li>
+                </ul>
+                <div class="mobile-menu">
+                    <i class="fas fa-bars"></i>
+                </div>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <div class="dashboard">
+                <!-- Sidebar -->
+                <div class="sidebar">
+                    <ul class="menu-list">
+                        <li><a href="#" class="active"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+                        <li><a href="#" id="showCollectionForm"><i class="fas fa-truck"></i> Schedule Collection</a></li>
+                        <li><a href="#" id="showWasteListing"><i class="fas fa-list"></i> Waste Listings</a></li>
+                        <li><a href="#" id="showAnalytics"><i class="fas fa-chart-line"></i> Analytics</a></li>
+                        <li><a href="#"><i class="fas fa-map-marker-alt"></i> Locations</a></li>
+                        <li><a href="#"><i class="fas fa-file-alt"></i> Reports</a></li>
+                        <li><a href="#"><i class="fas fa-users"></i> Users</a></li>
+                        <li><a href="#"><i class="fas fa-cog"></i> Settings</a></li>
+                    </ul>
+                </div>
+
+                <!-- Content Area -->
+                <div class="content">
+                    <!-- Stats Section -->
+                    <div class="stats-container">
+                        <div class="stat-card">
+                            <div class="header">
+                                <div class="title">Total Collections</div>
+                                <div class="icon"><i class="fas fa-truck"></i></div>
+                            </div>
+                            <div class="value">1,284</div>
+                            <div class="change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>12.5% this month</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="header">
+                                <div class="title">Waste Collected (tons)</div>
+                                <div class="icon"><i class="fas fa-weight"></i></div>
+                            </div>
+                            <div class="value">356.8</div>
+                            <div class="change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>8.3% this month</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="header">
+                                <div class="title">Recycled (%)</div>
+                                <div class="icon"><i class="fas fa-recycle"></i></div>
+                            </div>
+                            <div class="value">68.4%</div>
+                            <div class="change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>3.2% this month</span>
+                            </div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="header">
+                                <div class="title">Active Locations</div>
+                                <div class="icon"><i class="fas fa-map-marker-alt"></i></div>
+                            </div>
+                            <div class="value">87</div>
+                            <div class="change negative">
+                                <i class="fas fa-arrow-down"></i>
+                                <span>2.1% this month</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Recent Collections Table -->
+                    <div class="data-container" id="recentCollections">
+                        <div class="data-header">
+                            <div class="data-title">Recent Collection Requests</div>
+                            <div class="data-actions">
+                                <button class="btn btn-outline" id="refreshCollections">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Refresh</span>
+                                </button>
+                                <button class="btn" id="newCollectionBtn">
+                                    <i class="fas fa-plus"></i>
+                                    <span>New Request</span>
+                                </button>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Request ID</th>
+                                    <th>Location</th>
+                                    <th>Waste Type</th>
+                                    <th>Estimated Weight</th>
+                                    <th>Scheduled Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="collectionsTableBody">
+                                <!-- Table rows will be added dynamically with JavaScript -->
+                            </tbody>
+                        </table>
+                        <div class="api-response" id="collectionsApiResponse">
+                            <pre>API response will appear here after data fetching...</pre>
+                        </div>
+                    </div>
+
+                    <!-- New Collection Form -->
+                    <div class="form-container" id="collectionForm" style="display: none;">
+                        <div class="form-title">Schedule New Waste Collection</div>
+                        <form id="newCollectionForm">
+                            <div class="form-grid">
+                                <div class="form-group">
+                                    <label for="location">Location</label>
+                                    <select class="form-control" id="location" required>
+                                        <option value="">Select Location</option>
+                                        <option value="1">North Facility</option>
+                                        <option value="2">South Warehouse</option>
+                                        <option value="3">East Plant</option>
+                                        <option value="4">West Distribution Center</option>
+                                        <option value="5">Central Office</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="wasteType">Waste Type</label>
+                                    <select class="form-control" id="wasteType" required>
+                                        <option value="">Select Waste Type</option>
+                                        <option value="general">General Waste</option>
+                                        <option value="recyclable">Recyclable</option>
+                                        <option value="organic">Organic</option>
+                                        <option value="hazardous">Hazardous</option>
+                                        <option value="electronic">Electronic</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="estimatedWeight">Estimated Weight (kg)</label>
+                                    <input type="number" class="form-control" id="estimatedWeight" min="1" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="scheduledDate">Scheduled Date</label>
+                                    <input type="date" class="form-control" id="scheduledDate" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactPerson">Contact Person</label>
+                                    <input type="text" class="form-control" id="contactPerson" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="contactPhone">Contact Phone</label>
+                                    <input type="tel" class="form-control" id="contactPhone" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="notes">Additional Notes</label>
+                                    <textarea class="form-control" id="notes" rows="3"></textarea>
+                                </div>
+                                <div class="form-group">
+                                    <label for="priority">Priority</label>
+                                    <select class="form-control" id="priority">
+                                        <option value="normal">Normal</option>
+                                        <option value="high">High</option>
+                                        <option value="urgent">Urgent</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="form-actions">
+                                <button type="button" class="btn btn-outline" id="cancelCollectionForm">Cancel</button>
+                                <button type="submit" class="btn">Submit Request</button>
+                            </div>
+                        </form>
+                        <div class="api-response" id="collectionFormApiResponse">
+                            <pre>API response will appear here after submission...</pre>
+                        </div>
+                    </div>
+
+                    <!-- Waste Listings -->
+                    <div class="data-container" id="wasteListings" style="display: none;">
+                        <div class="data-header">
+                            <div class="data-title">Waste Inventory</div>
+                            <div class="data-actions">
+                                <button class="btn btn-outline" id="refreshWasteListings">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Refresh</span>
+                                </button>
+                                <button class="btn" id="addWasteBtn">
+                                    <i class="fas fa-plus"></i>
+                                    <span>Add Waste</span>
+                                </button>
+                            </div>
+                        </div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Waste ID</th>
+                                    <th>Type</th>
+                                    <th>Category</th>
+                                    <th>Quantity (kg)</th>
+                                    <th>Storage Location</th>
+                                    <th>Date Added</th>
+                                    <th>Processing Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="wasteListingsTableBody">
+                                <!-- Table rows will be added dynamically with JavaScript -->
+                            </tbody>
+                        </table>
+                        <div class="api-response" id="wasteListingsApiResponse">
+                            <pre>API response will appear here after data fetching...</pre>
+                        </div>
+                    </div>
+
+                    <!-- Analytics Dashboard -->
+                    <div class="data-container" id="analyticsContainer" style="display: none;">
+                        <div class="data-header">
+                            <div class="data-title">Waste Analytics</div>
+                            <div class="data-actions">
+                                <button class="btn btn-outline" id="refreshAnalytics">
+                                    <i class="fas fa-sync-alt"></i>
+                                    <span>Refresh</span>
+                                </button>
+                                <select class="form-control" id="analyticsPeriod">
+                                    <option value="week">Last Week</option>
+                                    <option value="month" selected>Last Month</option>
+                                    <option value="quarter">Last Quarter</option>
+                                    <option value="year">Last Year</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div id="analyticsCharts" style="display: flex; flex-wrap: wrap; gap: 20px; margin-top: 20px;">
+                            <div style="flex: 1; min-width: 300px; height: 300px; background-color: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <p>Waste by Type Chart</p>
+                            </div>
+                            <div style="flex: 1; min-width: 300px; height: 300px; background-color: #f5f5f5; border-radius: 8px; display: flex; align-items: center; justify-content: center;">
+                                <p>Monthly Collection Trends</p>
+                            </div>
+                        </div>
+                        <div class="api-response" id="analyticsApiResponse">
+                            <pre>API response will appear here after data fetching...</pre>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <p>&copy; 2025 EcoTrack Waste Management System. All rights reserved.</p>
+                <p>Version 1.0.0</p>
+            </div>
+        </div>
+    </footer>
+    <script>
+        // Complete the API simulation function
+        async function simulateApiRequest(endpoint, method = 'GET', data = null) {
+            showLoader();
+            
+            // Simulate network delay
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            let response;
+            
+            switch (endpoint) {
+                case '/api/collections':
+                    if (method === 'GET') {
+                        response = {
+                            status: 200,
+                            data: sampleCollections,
+                            message: "Collections retrieved successfully"
+                        };
+                    } else if (method === 'POST') {
+                        // Simulated response for a new collection submission
+                        const newId = `WC-2025-${Math.floor(Math.random() * 1000).toString().padStart(4, '0')}`;
+                        response = {
+                            status: 201,
+                            data: {
+                                id: newId,
+                                ...data,
+                                status: "pending"
+                            },
+                            message: "Collection request created successfully"
+                        };
+                    }
+                    break;
+                
+                case '/api/waste-listings':
+                    response = {
+                        status: 200,
+                        data: sampleWasteListings,
+                        message: "Waste listings retrieved successfully"
+                    };
+                    break;
+                    
+                case '/api/analytics':
+                    response = {
+                        status: 200,
+                        data: {
+                            wasteByType: {
+                                labels: ["General", "Recyclable", "Organic", "Hazardous", "Electronic"],
+                                data: [25, 40, 15, 10, 10]
+                            },
+                            monthlyTrends: {
+                                labels: ["Jan", "Feb", "Mar", "Apr", "May", "Jun"],
+                                data: [120, 150, 180, 200, 220, 250]
+                            }
+                        },
+                        message: "Analytics data retrieved successfully"
+                    };
+                    break;
+                    
+                default:
+                    response = {
+                        status: 404,
+                        message: "Endpoint not found"
+                    };
+            }
+            
+            hideLoader();
+            return response;
+        }
+    
+        // Render collections table
+        async function renderCollectionsTable() {
+            const response = await simulateApiRequest('/api/collections');
+            
+            if (response.status === 200) {
+                collectionsTableBody.innerHTML = '';
+                
+                response.data.forEach(collection => {
+                    const row = document.createElement('tr');
+                    
+                    // Determine status class and text
+                    let statusClass, statusText;
+                    switch(collection.status) {
+                        case 'completed':
+                            statusClass = 'status-completed';
+                            statusText = 'Completed';
+                            break;
+                        case 'pending':
+                            statusClass = 'status-pending';
+                            statusText = 'Pending';
+                            break;
+                        case 'failed':
+                            statusClass = 'status-failed';
+                            statusText = 'Failed';
+                            break;
+                        default:
+                            statusClass = 'status-pending';
+                            statusText = 'Pending';
+                    }
+                    
+                    row.innerHTML = `
+                        <td>${collection.id}</td>
+                        <td>${collection.location}</td>
+                        <td>${collection.wasteType}</td>
+                        <td>${collection.estimatedWeight} kg</td>
+                        <td>${collection.scheduledDate}</td>
+                        <td><span class="status ${statusClass}">${statusText}</span></td>
+                        <td class="action-cell">
+                            <button class="action-btn" title="View Details"><i class="fas fa-eye"></i></button>
+                            <button class="action-btn" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn" title="Delete"><i class="fas fa-trash"></i></button>
+                        </td>
+                    `;
+                    
+                    collectionsTableBody.appendChild(row);
+                });
+                
+                collectionsApiResponse.querySelector('pre').textContent = JSON.stringify(response, null, 2);
+            }
+        }
+    
+        // Render waste listings table
+        async function renderWasteListingsTable() {
+            const response = await simulateApiRequest('/api/waste-listings');
+            
+            if (response.status === 200) {
+                wasteListingsTableBody.innerHTML = '';
+                
+                response.data.forEach(waste => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${waste.id}</td>
+                        <td>${waste.type}</td>
+                        <td>${waste.category}</td>
+                        <td>${waste.quantity} kg</td>
+                        <td>${waste.storageLocation}</td>
+                        <td>${waste.dateAdded}</td>
+                        <td>${waste.processingStatus}</td>
+                        <td class="action-cell">
+                            <button class="action-btn" title="View Details"><i class="fas fa-eye"></i></button>
+                            <button class="action-btn" title="Edit"><i class="fas fa-edit"></i></button>
+                            <button class="action-btn" title="Process"><i class="fas fa-cog"></i></button>
+                        </td>
+                    `;
+                    
+                    wasteListingsTableBody.appendChild(row);
+                });
+                
+                wasteListingsApiResponse.querySelector('pre').textContent = JSON.stringify(response, null, 2);
+            }
+        }
+    
+        // Handle form submission
+        newCollectionForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const formData = {
+                location: document.getElementById('location').options[document.getElementById('location').selectedIndex].text,
+                wasteType: document.getElementById('wasteType').value,
+                estimatedWeight: document.getElementById('estimatedWeight').value,
+                scheduledDate: document.getElementById('scheduledDate').value,
+                contactPerson: document.getElementById('contactPerson').value,
+                contactPhone: document.getElementById('contactPhone').value,
+                notes: document.getElementById('notes').value,
+                priority: document.getElementById('priority').value
+            };
+            
+            const response = await simulateApiRequest('/api/collections', 'POST', formData);
+            
+            if (response.status === 201) {
+                collectionFormApiResponse.querySelector('pre').textContent = JSON.stringify(response, null, 2);
+                newCollectionForm.reset();
+                renderCollectionsTable();
+                showSection('recentCollections');
+            }
+        });
+    
+        // Navigation functions
+        function showSection(sectionId) {
+            recentCollectionsContainer.style.display = 'none';
+            collectionForm.style.display = 'none';
+            wasteListings.style.display = 'none';
+            analyticsContainer.style.display = 'none';
+            
+            document.getElementById(sectionId).style.display = 'block';
+        }
+    
+        // Event listeners for navigation
+        showCollectionForm.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('collectionForm');
+        });
+    
+        showWasteListing.addEventListener('click', (e) => {
+            e.preventDefault();
+            renderWasteListingsTable();
+            showSection('wasteListings');
+        });
+    
+        showAnalytics.addEventListener('click', (e) => {
+            e.preventDefault();
+            showSection('analyticsContainer');
+        });
+    
+        cancelCollectionForm.addEventListener('click', () => {
+            showSection('recentCollections');
+        });
+    
+        newCollectionBtn.addEventListener('click', () => {
+            showSection('collectionForm');
+        });
+    
+        refreshCollections.addEventListener('click', () => {
+            renderCollectionsTable();
+        });
+    
+        refreshWasteListings.addEventListener('click', () => {
+            renderWasteListingsTable();
+        });
+    
+        refreshAnalytics.addEventListener('click', () => {
+            // In a real app, this would refresh analytics data
+            analyticsApiResponse.querySelector('pre').textContent = "Refreshing analytics data...";
+            setTimeout(() => {
+                simulateApiRequest('/api/analytics').then(response => {
+                    analyticsApiResponse.querySelector('pre').textContent = JSON.stringify(response, null, 2);
+                });
+            }, 1000);
+        });
+    
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', () => {
+            renderCollectionsTable();
+            
+            // Set default date to today + 2 days
+            const today = new Date();
+            today.setDate(today.getDate() + 2);
+            const formattedDate = today.toISOString().split('T')[0];
+            document.getElementById('scheduledDate').value = formattedDate;
+            document.getElementById('scheduledDate').min = formattedDate;
+        });
+    </script>
+</body>
+</html>

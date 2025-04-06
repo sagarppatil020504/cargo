@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Item Management</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      padding: 20px;
+    }
+    h2 {
+      color: #333;
+    }
+    form {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, select {
+      padding: 8px;
+      margin: 5px 0;
+      width: 100%;
+      box-sizing: border-box;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      padding: 10px 20px;
+      border: none;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .result {
+      background: #fff;
+      padding: 10px;
+      border-left: 5px solid #007BFF;
+      margin-top: 10px;
+    }
+  </style>
+</head>
+<body>
+
+  <h2>🔍 Search Item</h2>
+  <form id="searchForm">
+    <input type="text" id="itemId" placeholder="Item ID (optional)">
+    <input type="text" id="itemName" placeholder="Item Name (optional)">
+    <button type="submit">Search</button>
+  </form>
+  <div id="searchResult" class="result"></div>
+
+  <h2>📦 Retrieve Item</h2>
+  <form id="retrieveForm">
+    <input type="text" id="retrieveItemId" placeholder="Item ID" required>
+    <input type="text" id="retrieveUserId" placeholder="User ID" required>
+    <input type="datetime-local" id="retrieveTimestamp" required>
+    <button type="submit">Log Retrieval</button>
+  </form>
+  <div id="retrieveResult" class="result"></div>
+
+  <h2>↩️ Place Item Back</h2>
+  <form id="placeForm">
+    <input type="text" id="placeItemId" placeholder="Item ID" required>
+    <input type="text" id="placeUserId" placeholder="User ID" required>
+    <input type="datetime-local" id="placeTimestamp" required>
+    <input type="text" id="containerId" placeholder="Container ID" required>
+    
+    <h4>Start Coordinates</h4>
+    <input type="number" step="any" id="startWidth" placeholder="Start Width">
+    <input type="number" step="any" id="startDepth" placeholder="Start Depth">
+    <input type="number" step="any" id="startHeight" placeholder="Start Height">
+    
+    <h4>End Coordinates</h4>
+    <input type="number" step="any" id="endWidth" placeholder="End Width">
+    <input type="number" step="any" id="endDepth" placeholder="End Depth">
+    <input type="number" step="any" id="endHeight" placeholder="End Height">
+
+    <button type="submit">Place Back</button>
+  </form>
+  <div id="placeResult" class="result"></div>
+
+  <script>
+    const baseUrl = "http://localhost:8000"; // Update if hosted elsewhere
+
+    // Search
+    document.getElementById("searchForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const itemId = document.getElementById("itemId").value;
+      const itemName = document.getElementById("itemName").value;
+
+      const url = new URL(`${baseUrl}/search`);
+      if (itemId) url.searchParams.append("itemId", itemId);
+      if (itemName) url.searchParams.append("itemName", itemName);
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      const resultDiv = document.getElementById("searchResult");
+      if (data.found) {
+        resultDiv.innerHTML = `
+          <strong>Item Found:</strong><br>
+          ID: ${data.item.itemId}<br>
+          Name: ${data.item.name}<br>
+          Zone: ${data.item.zone}<br>
+          Container: ${data.item.containerId}<br>
+          Start: ${JSON.stringify(data.item.position.startCoordinates)}<br>
+          End: ${JSON.stringify(data.item.position.endCoordinates)}<br>
+          <br><strong>Steps:</strong><br>
+          ${data.retrievalSteps.map(s => `Step ${s.step}: ${s.action}`).join("<br>")}
+        `;
+      } else {
+        resultDiv.innerHTML = "<strong>No item found.</strong>";
+      }
+    });
+
+    // Retrieve
+    document.getElementById("retrieveForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const payload = {
+        itemId: document.getElementById("retrieveItemId").value,
+        userId: document.getElementById("retrieveUserId").value,
+        timestamp: document.getElementById("retrieveTimestamp").value
+      };
+
+      const res = await fetch(`${baseUrl}/retrieve`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      document.getElementById("retrieveResult").innerText = data.message;
+    });
+
+    // Place Back
+    document.getElementById("placeForm").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const payload = {
+        itemId: document.getElementById("placeItemId").value,
+        userId: document.getElementById("placeUserId").value,
+        timestamp: document.getElementById("placeTimestamp").value,
+        containerId: document.getElementById("containerId").value,
+        position: {
+          startCoordinates: {
+            width: parseFloat(document.getElementById("startWidth").value),
+            depth: parseFloat(document.getElementById("startDepth").value),
+            height: parseFloat(document.getElementById("startHeight").value),
+          },
+          endCoordinates: {
+            width: parseFloat(document.getElementById("endWidth").value),
+            depth: parseFloat(document.getElementById("endDepth").value),
+            height: parseFloat(document.getElementById("endHeight").value),
+          }
+        }
+      };
+
+      const res = await fetch(`${baseUrl}/place`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      document.getElementById("placeResult").innerText = data.message;
+    });
+  </script>
+</body>
+</html>

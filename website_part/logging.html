@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logging Item Containers - Cargo-Handler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            padding: 20px;
+            color: #333;
+        }
+
+        header {
+            background-color: #1a4f72;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+        }
+
+        .back-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .filters-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            margin-bottom: 30px;
+        }
+
+        .filters-container h2 {
+            margin-bottom: 15px;
+            color: #1a4f72;
+            font-size: 1.5rem;
+        }
+
+        .filter-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .filter-group {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        .filter-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .filter-group input, .filter-group select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 1rem;
+        }
+
+        .filter-group input:focus, .filter-group select:focus {
+            outline: none;
+            border-color: #1a4f72;
+        }
+
+        .actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .search-btn {
+            background-color: #1a4f72;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .search-btn:hover {
+            background-color: #15405f;
+        }
+
+        .reset-btn {
+            background-color: #f8f9fa;
+            color: #333;
+            border: 1px solid #ddd;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .reset-btn:hover {
+            background-color: #e9ecef;
+        }
+
+        .logs-container {
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 20px;
+            margin-bottom: 20px;
+            overflow: hidden;
+        }
+
+        .logs-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .logs-header h2 {
+            color: #1a4f72;
+            font-size: 1.5rem;
+        }
+
+        .logs-count {
+            background-color: #e9ecef;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: 600;
+        }
+
+        .logs-table-container {
+            overflow-x: auto;
+        }
+
+        .logs-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.95rem;
+        }
+
+        .logs-table th, .logs-table td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #eee;
+        }
+
+        .logs-table th {
+            background-color: #f5f7f9;
+            font-weight: 600;
+            color: #1a4f72;
+            position: sticky;
+            top: 0;
+        }
+
+        .logs-table tr:hover {
+            background-color: #f9f9f9;
+        }
+
+        .action-cell {
+            white-space: nowrap;
+            padding: 5px 10px;
+            border-radius: 4px;
+            font-weight: 500;
+            font-size: 0.85rem;
+            display: inline-block;
+        }
+
+        .action-move {
+            background-color: #e3f2fd;
+            color: #0d47a1;
+        }
+
+        .action-create {
+            background-color: #e8f5e9;
+            color: #1b5e20;
+        }
+
+        .action-delete {
+            background-color: #ffebee;
+            color: #b71c1c;
+        }
+
+        .action-update {
+            background-color: #fff8e1;
+            color: #f57f17;
+        }
+
+        .details-cell {
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 50px 20px;
+            color: #666;
+        }
+
+        .empty-state p {
+            margin: 10px 0;
+            font-size: 1.1rem;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #1a4f72;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            margin-top: 20px;
+            gap: 5px;
+        }
+
+        .pagination button {
+            background-color: #fff;
+            border: 1px solid #ddd;
+            padding: 8px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .pagination button:hover:not(.active, :disabled) {
+            background-color: #f5f5f5;
+        }
+
+        .pagination button.active {
+            background-color: #1a4f72;
+            color: white;
+            border-color: #1a4f72;
+        }
+
+        .pagination button:disabled {
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .error-message {
+            background-color: #ffebee;
+            border-left: 4px solid #f44336;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            color: #b71c1c;
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+
+        /* Responsive adjustments */
+        @media (max-width: 768px) {
+            .filter-group {
+                min-width: 100%;
+            }
+            
+            .filter-row {
+                flex-direction: column;
+                gap: 10px;
+            }
+            
+            .logs-table th, .logs-table td {
+                padding: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Logging Item Containers</h1>
+        <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+    </header>
+
+    <div class="container">
+        <div class="filters-container">
+            <h2>Search Logs</h2>
+            <form id="log-search-form">
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="startDate">Start Date</label>
+                        <input type="datetime-local" id="startDate" name="startDate" required>
+                    </div>
+                    <div class="filter-group">
+                        <label for="endDate">End Date</label>
+                        <input type="datetime-local" id="endDate" name="endDate" required>
+                    </div>
+                </div>
+                <div class="filter-row">
+                    <div class="filter-group">
+                        <label for="itemId">Item ID</label>
+                        <input type="text" id="itemId" name="itemId" placeholder="Filter by item ID">
+                    </div>
+                    <div class="filter-group">
+                        <label for="userId">User ID</label>
+                        <input type="text" id="userId" name="userId" placeholder="Filter by user ID">
+                    </div>
+                    <div class="filter-group">
+                        <label for="actionType">Action Type</label>
+                        <select id="actionType" name="actionType">
+                            <option value="">All Actions</option>
+                            <option value="CREATE">Create</option>
+                            <option value="MOVE">Move</option>
+                            <option value="UPDATE">Update</option>
+                            <option value="DELETE">Delete</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="actions">
+                    <button type="button" class="reset-btn" id="reset-btn">Reset Filters</button>
+                    <button type="submit" class="search-btn">Search Logs</button>
+                </div>
+            </form>
+        </div>
+
+        <div id="error-container"></div>
+
+        <div class="logs-container">
+            <div class="logs-header">
+                <h2>Log Results</h2>
+                <span class="logs-count" id="logs-count">0 logs found</span>
+            </div>
+            
+            <div id="loading" class="loading">
+                <div class="spinner"></div>
+                <p>Loading logs...</p>
+            </div>
+            
+            <div id="empty-state" class="empty-state">
+                <p>No logs found for the selected filters.</p>
+                <p>Try adjusting your search criteria.</p>
+            </div>
+            
+            <div id="logs-table-container" class="logs-table-container">
+                <table class="logs-table" id="logs-table">
+                    <thead>
+                        <tr>
+                            <th>Timestamp</th>
+                            <th>User ID</th>
+                            <th>Action</th>
+                            <th>Item ID</th>
+                            <th>Details</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-body">
+                        <!-- Log entries will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="pagination" id="pagination">
+                <!-- Pagination controls will be inserted here -->
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Cargo-Handler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const form = document.getElementById('log-search-form');
+            const resetBtn = document.getElementById('reset-btn');
+            const loadingEl = document.getElementById('loading');
+            const emptyStateEl = document.getElementById('empty-state');
+            const logsTableContainer = document.getElementById('logs-table-container');
+            const logsBody = document.getElementById('logs-body');
+            const logsCount = document.getElementById('logs-count');
+            const errorContainer = document.getElementById('error-container');
+            const paginationEl = document.getElementById('pagination');
+            
+            // Initialize date inputs with current day
+            const now = new Date();
+            const startOfDay = new Date(now);
+            startOfDay.setHours(0, 0, 0, 0);
+            const endOfDay = new Date(now);
+            endOfDay.setHours(23, 59, 59, 999);
+            
+            document.getElementById('startDate').value = formatDateForInput(startOfDay);
+            document.getElementById('endDate').value = formatDateForInput(endOfDay);
+            
+            // Pagination state
+            let currentPage = 1;
+            const logsPerPage = 10;
+            let allLogs = [];
+            
+            // Hide elements initially
+            loadingEl.style.display = 'none';
+            emptyStateEl.style.display = 'none';
+            logsTableContainer.style.display = 'none';
+            
+            // Event listeners
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                searchLogs();
+            });
+            
+            resetBtn.addEventListener('click', function() {
+                form.reset();
+                // Reset date inputs to current day
+                document.getElementById('startDate').value = formatDateForInput(startOfDay);
+                document.getElementById('endDate').value = formatDateForInput(endOfDay);
+            });
+            
+            // Format date for datetime-local input
+            function formatDateForInput(date) {
+                const year = date.getFullYear();
+                const month = String(date.getMonth() + 1).padStart(2, '0');
+                const day = String(date.getDate()).padStart(2, '0');
+                const hours = String(date.getHours()).padStart(2, '0');
+                const minutes = String(date.getMinutes()).padStart(2, '0');
+                
+                return `${year}-${month}-${day}T${hours}:${minutes}`;
+            }
+            
+            // Format date for display
+            function formatDateForDisplay(dateString) {
+                const date = new Date(dateString);
+                return date.toLocaleString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit',
+                    second: '2-digit'
+                });
+            }
+            
+            // Get action class based on action type
+            function getActionClass(actionType) {
+                switch(actionType.toUpperCase()) {
+                    case 'CREATE': return 'action-create';
+                    case 'MOVE': return 'action-move';
+                    case 'DELETE': return 'action-delete';
+                    case 'UPDATE': return 'action-update';
+                    default: return '';
+                }
+            }
+            
+            // Format details for display
+            function formatDetails(details) {
+                let formattedDetails = [];
+                
+                if (details.fromContainer) {
+                    formattedDetails.push(`From: ${details.fromContainer}`);
+                }
+                
+                if (details.toContainer) {
+                    formattedDetails.push(`To: ${details.toContainer}`);
+                }
+                
+                if (details.reason) {
+                    formattedDetails.push(`Reason: ${details.reason}`);
+                }
+                
+                return formattedDetails.join('<br>');
+            }
+            
+            // Search logs function
+            function searchLogs() {
+                // Clear previous results
+                errorContainer.innerHTML = '';
+                
+                // Show loading
+                loadingEl.style.display = 'block';
+                emptyStateEl.style.display = 'none';
+                logsTableContainer.style.display = 'none';
+                
+                // Get form values
+                const startDate = document.getElementById('startDate').value;
+                const endDate = document.getElementById('endDate').value;
+                const itemId = document.getElementById('itemId').value;
+                const userId = document.getElementById('userId').value;
+                const actionType = document.getElementById('actionType').value;
+                
+                // Build query parameters
+                let queryParams = `startDate=${encodeURIComponent(startDate)}&endDate=${encodeURIComponent(endDate)}`;
+                
+                if (itemId) {
+                    queryParams += `&itemId=${encodeURIComponent(itemId)}`;
+                }
+                
+                if (userId) {
+                    queryParams += `&userId=${encodeURIComponent(userId)}`;
+                }
+                
+                if (actionType) {
+                    queryParams += `&actionType=${encodeURIComponent(actionType)}`;
+                }
+                
+                // Make API request
+                fetch(`http://localhost:8000/logs?${queryParams}`)
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! Status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
+                    .then(data => {
+                        // Hide loading
+                        loadingEl.style.display = 'none';
+                        
+                        // Reset pagination
+                        currentPage = 1;
+                        allLogs = data.logs || [];
+                        
+                        // Update logs count
+                        logsCount.textContent = `${allLogs.length} logs found`;
+                        
+                        if (allLogs.length === 0) {
+                            // Show empty state
+                            emptyStateEl.style.display = 'block';
+                            logsTableContainer.style.display = 'none';
+                        } else {
+                            // Show logs table
+                            emptyStateEl.style.display = 'none';
+                            logsTableContainer.style.display = 'block';
+                            
+                            // Display logs
+                            displayLogsPage(currentPage);
+                        }
+                    })
+                    .catch(error => {
+                        // Hide loading
+                        loadingEl.style.display = 'none';
+                        
+                        // Show error message
+                        errorContainer.innerHTML = `
+                            <div class="error-message">
+                                <p>Error fetching logs: ${error.message}</p>
+                                <p>Please check that the API server is running at localhost:8000.</p>
+                            </div>
+                        `;
+                    });
+            }
+            
+            // Display logs for current page
+            function displayLogsPage(page) {
+                const start = (page - 1) * logsPerPage;
+                const end = start + logsPerPage;
+                const paginatedLogs = allLogs.slice(start, end);
+                
+                // Clear previous logs
+                logsBody.innerHTML = '';
+                
+                // Add logs to table
+                paginatedLogs.forEach(log => {
+                    const row = document.createElement('tr');
+                    
+                    row.innerHTML = `
+                        <td>${formatDateForDisplay(log.timestamp)}</td>
+                        <td>${log.userId}</td>
+                        <td><span class="action-cell ${getActionClass(log.actionType)}">${log.actionType}</span></td>
+                        <td>${log.itemId}</td>
+                        <td class="details-cell">${formatDetails(log.details)}</td>
+                    `;
+                    
+                    logsBody.appendChild(row);
+                });
+                
+                // Update pagination
+                updatePagination();
+            }
+            
+            // Update pagination controls
+            function updatePagination() {
+                const totalPages = Math.ceil(allLogs.length / logsPerPage);
+                
+                let paginationHTML = '';
+                
+                // Previous button
+                paginationHTML += `
+                    <button ${currentPage === 1 ? 'disabled' : ''} onclick="changePage(${currentPage - 1})">
+                        &laquo; Prev
+                    </button>
+                `;
+                
+                // Page numbers
+                for (let i = 1; i <= totalPages; i++) {
+                    // Only show 5 page numbers centered around current page
+                    if (
+                        i === 1 || 
+                        i === totalPages || 
+                        (i >= currentPage - 2 && i <= currentPage + 2)
+                    ) {
+                        paginationHTML += `
+                            <button class="${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">
+                                ${i}
+                            </button>
+                        `;
+                    } else if (
+                        i === currentPage - 3 || 
+                        i === currentPage + 3
+                    ) {
+                        paginationHTML += `<button disabled>...</button>`;
+                    }
+                }
+                
+                // Next button
+                paginationHTML += `
+                    <button ${currentPage === totalPages ? 'disabled' : ''} onclick="changePage(${currentPage + 1})">
+                        Next &raquo;
+                    </button>
+                `;
+                
+                paginationEl.innerHTML = paginationHTML;
+            }
+            
+            // Global function to change page (called from pagination buttons)
+            window.changePage = function(page) {
+                currentPage = page;
+                displayLogsPage(currentPage);
+                
+                // Scroll to top of table
+                logsTableContainer.scrollTop = 0;
+            };
+            
+            // Initial search with default values
+            searchLogs();
+        });
+    </script>
+</body>
+</html>

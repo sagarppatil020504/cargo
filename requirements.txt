@@ -1,0 +1,12 @@
+tk
+fastapi
+uvicorn
+sqlalchemy
+pydantic
+sqlite3
+requests
+math
+datetime
+typing
+uuid
+routers

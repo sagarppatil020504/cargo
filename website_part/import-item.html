@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Import Item - Cargo-Handler</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        body {
+            background-color: #f0f4f8;
+            padding: 20px;
+            color: #333;
+        }
+
+        header {
+            background-color: #1a4f72;
+            color: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 2rem;
+        }
+
+        .back-button {
+            background-color: rgba(255, 255, 255, 0.2);
+            border: none;
+            color: white;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background-color 0.3s;
+        }
+
+        .back-button:hover {
+            background-color: rgba(255, 255, 255, 0.3);
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            padding: 30px;
+        }
+
+        .tab-container {
+            display: flex;
+            border-bottom: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        .tab {
+            padding: 10px 20px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.3s;
+            font-weight: 600;
+        }
+
+        .tab.active {
+            border-bottom: 3px solid #1a4f72;
+            color: #1a4f72;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .upload-section {
+            border: 2px dashed #ccc;
+            padding: 40px;
+            text-align: center;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            transition: border-color 0.3s;
+        }
+
+        .upload-section:hover {
+            border-color: #1a4f72;
+        }
+
+        .upload-section.dragover {
+            background-color: rgba(26, 79, 114, 0.05);
+            border-color: #1a4f72;
+        }
+
+        .upload-section h3 {
+            margin-bottom: 10px;
+            color: #1a4f72;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .upload-btn {
+            background-color: #1a4f72;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .upload-btn:hover {
+            background-color: #15405f;
+        }
+
+        .file-info {
+            margin-top: 15px;
+            font-size: 0.9rem;
+            color: #666;
+        }
+
+        .preview-container {
+            margin-top: 30px;
+            display: none;
+        }
+
+        .preview-container h3 {
+            margin-bottom: 15px;
+            color: #1a4f72;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 20px;
+        }
+
+        .preview-table th, .preview-table td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        .preview-table th {
+            background-color: #f5f7f9;
+            font-weight: 600;
+        }
+
+        .preview-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        .submit-btn {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: background-color 0.3s;
+        }
+
+        .submit-btn:hover {
+            background-color: #218838;
+        }
+
+        .result-container {
+            margin-top: 30px;
+            display: none;
+            padding: 20px;
+            border-radius: 8px;
+        }
+
+        .result-success {
+            background-color: rgba(40, 167, 69, 0.1);
+            border: 1px solid rgba(40, 167, 69, 0.2);
+        }
+
+        .result-error {
+            background-color: rgba(220, 53, 69, 0.1);
+            border: 1px solid rgba(220, 53, 69, 0.2);
+        }
+
+        .result-container h3 {
+            margin-bottom: 15px;
+            color: #1a4f72;
+        }
+
+        .result-summary {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+
+        .error-list {
+            margin-top: 15px;
+        }
+
+        .error-item {
+            background-color: #fff;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 8px;
+            border-left: 3px solid #dc3545;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 4px solid rgba(0, 0, 0, 0.1);
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            border-left-color: #1a4f72;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        footer {
+            margin-top: 50px;
+            text-align: center;
+            color: #666;
+            padding: 20px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Import Item</h1>
+        <button class="back-button" onclick="window.location.href='index.html'">Back to Home</button>
+    </header>
+
+    <div class="container">
+        <div class="tab-container">
+            <div class="tab active" data-tab="items">Import Items</div>
+            <div class="tab" data-tab="containers">Import Containers</div>
+        </div>
+
+        <div class="tab-content active" id="items-tab">
+            <div class="upload-section" id="items-upload-section">
+                <h3>Upload Items CSV File</h3>
+                <p>Drag and drop your CSV file here or click to browse</p>
+                <input type="file" id="items-file-input" class="file-input" accept=".csv">
+                <button class="upload-btn" id="items-upload-btn">Select CSV File</button>
+                <div class="file-info" id="items-file-info"></div>
+            </div>
+
+            <div class="preview-container" id="items-preview-container">
+                <h3>CSV Data Preview</h3>
+                <div class="preview-table-wrapper">
+                    <table class="preview-table" id="items-preview-table">
+                        <!-- Table content will be dynamically generated -->
+                    </table>
+                </div>
+                <button class="submit-btn" id="items-submit-btn">Import Items</button>
+            </div>
+
+            <div class="loading" id="items-loading">
+                <div class="spinner"></div>
+                <p>Importing items...</p>
+            </div>
+
+            <div class="result-container" id="items-result-container">
+                <h3>Import Results</h3>
+                <div class="result-summary" id="items-result-summary"></div>
+                <div class="error-list" id="items-error-list"></div>
+            </div>
+        </div>
+
+        <div class="tab-content" id="containers-tab">
+            <div class="upload-section" id="containers-upload-section">
+                <h3>Upload Containers CSV File</h3>
+                <p>Drag and drop your CSV file here or click to browse</p>
+                <input type="file" id="containers-file-input" class="file-input" accept=".csv">
+                <button class="upload-btn" id="containers-upload-btn">Select CSV File</button>
+                <div class="file-info" id="containers-file-info"></div>
+            </div>
+
+            <div class="preview-container" id="containers-preview-container">
+                <h3>CSV Data Preview</h3>
+                <div class="preview-table-wrapper">
+                    <table class="preview-table" id="containers-preview-table">
+                        <!-- Table content will be dynamically generated -->
+                    </table>
+                </div>
+                <button class="submit-btn" id="containers-submit-btn">Import Containers</button>
+            </div>
+
+            <div class="loading" id="containers-loading">
+                <div class="spinner"></div>
+                <p>Importing containers...</p>
+            </div>
+
+            <div class="result-container" id="containers-result-container">
+                <h3>Import Results</h3>
+                <div class="result-summary" id="containers-result-summary"></div>
+                <div class="error-list" id="containers-error-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <p>© 2025 Cargo-Handler. All rights reserved.</p>
+    </footer>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Tab functionality
+            const tabs = document.querySelectorAll('.tab');
+            const tabContents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => {
+                tab.addEventListener('click', () => {
+                    const tabId = tab.getAttribute('data-tab');
+                    
+                    // Update active tab
+                    tabs.forEach(t => t.classList.remove('active'));
+                    tab.classList.add('active');
+                    
+                    // Show active content
+                    tabContents.forEach(content => content.classList.remove('active'));
+                    document.getElementById(`${tabId}-tab`).classList.add('active');
+                });
+            });
+
+            // Setup for both items and containers
+            ['items', 'containers'].forEach(type => {
+                const uploadSection = document.getElementById(`${type}-upload-section`);
+                const fileInput = document.getElementById(`${type}-file-input`);
+                const uploadBtn = document.getElementById(`${type}-upload-btn`);
+                const fileInfo = document.getElementById(`${type}-file-info`);
+                const previewContainer = document.getElementById(`${type}-preview-container`);
+                const previewTable = document.getElementById(`${type}-preview-table`);
+                const submitBtn = document.getElementById(`${type}-submit-btn`);
+                const loading = document.getElementById(`${type}-loading`);
+                const resultContainer = document.getElementById(`${type}-result-container`);
+                const resultSummary = document.getElementById(`${type}-result-summary`);
+                const errorList = document.getElementById(`${type}-error-list`);
+                
+                let csvData = null;
+                
+                // File input setup
+                uploadBtn.addEventListener('click', () => {
+                    fileInput.click();
+                });
+                
+                fileInput.addEventListener('change', handleFileSelect);
+                
+                // Drag and drop functionality
+                uploadSection.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadSection.classList.add('dragover');
+                });
+                
+                uploadSection.addEventListener('dragleave', () => {
+                    uploadSection.classList.remove('dragover');
+                });
+                
+                uploadSection.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadSection.classList.remove('dragover');
+                    
+                    if (e.dataTransfer.files.length) {
+                        fileInput.files = e.dataTransfer.files;
+                        handleFileSelect();
+                    }
+                });
+                
+                // Submit button functionality
+                submitBtn.addEventListener('click', () => {
+                    if (!csvData) return;
+                    
+                    // Show loading
+                    previewContainer.style.display = 'none';
+                    loading.style.display = 'block';
+                    resultContainer.style.display = 'none';
+                    
+                    // Define the correct API endpoint
+                    const apiEndpoint = `http://localhost:8000/api/import/${type}`;
+                    
+                    // Create FormData and append the file
+                    const formData = new FormData();
+                    formData.append('file', fileInput.files[0]);
+                    
+                    // Send the request
+                    fetch(apiEndpoint, {
+                        method: 'POST',
+                        body: formData
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        // Hide loading
+                        loading.style.display = 'none';
+                        
+                        // Show results
+                        resultContainer.style.display = 'block';
+                        
+                        // Set result container class based on success
+                        if (data.success) {
+                            resultContainer.classList.add('result-success');
+                            resultContainer.classList.remove('result-error');
+                        } else {
+                            resultContainer.classList.add('result-error');
+                            resultContainer.classList.remove('result-success');
+                        }
+                        
+                        // Update summary
+                        resultSummary.textContent = data.success 
+                            ? `Successfully imported ${data.itemsImported} ${type}.` 
+                            : `Import failed. Please check the errors below.`;
+                        
+                        // Display errors if any
+                        errorList.innerHTML = '';
+                        if (data.errors && data.errors.length > 0) {
+                            data.errors.forEach(error => {
+                                const errorItem = document.createElement('div');
+                                errorItem.className = 'error-item';
+                                errorItem.textContent = `Row ${error.row}: ${error.message}`;
+                                errorList.appendChild(errorItem);
+                            });
+                        }
+                    })
+                    .catch(error => {
+                        // Hide loading
+                        loading.style.display = 'none';
+                        
+                        // Show error
+                        resultContainer.style.display = 'block';
+                        resultContainer.classList.add('result-error');
+                        resultContainer.classList.remove('result-success');
+                        
+                        resultSummary.textContent = `Error connecting to the server: ${error.message}`;
+                    });
+                });
+                
+                // File handling function
+                function handleFileSelect() {
+                    if (fileInput.files.length === 0) return;
+                    
+                    const file = fileInput.files[0];
+                    
+                    // Check if it's a CSV file
+                    if (file.type !== 'text/csv' && !file.name.endsWith('.csv')) {
+                        fileInfo.textContent = 'Please select a valid CSV file.';
+                        return;
+                    }
+                    
+                    fileInfo.textContent = `Selected file: ${file.name}`;
+                    
+                    // Parse CSV
+                    const reader = new FileReader();
+                    
+                    reader.onload = function(e) {
+                        const text = e.target.result;
+                        parseCSV(text);
+                    };
+                    
+                    reader.readAsText(file);
+                }
+                
+                // CSV parsing function
+                function parseCSV(text) {
+                    // Basic CSV parsing (handles commas within quotes)
+                    const lines = text.split(/\r\n|\n/);
+                    const headers = lines[0].split(',');
+                    
+                    csvData = lines.slice(1).map(line => {
+                        const values = [];
+                        let insideQuotes = false;
+                        let currentValue = '';
+                        
+                        for (let i = 0; i < line.length; i++) {
+                            const char = line[i];
+                            
+                            if (char === '"') {
+                                insideQuotes = !insideQuotes;
+                            } else if (char === ',' && !insideQuotes) {
+                                values.push(currentValue);
+                                currentValue = '';
+                            } else {
+                                currentValue += char;
+                            }
+                        }
+                        
+                        values.push(currentValue);
+                        
+                        return values.reduce((obj, val, i) => {
+                            obj[headers[i]] = val;
+                            return obj;
+                        }, {});
+                    });
+                    
+                    // Display preview
+                    displayPreview(headers, csvData);
+                }
+                
+                // Preview display function
+                function displayPreview(headers, data) {
+                    // Clear previous preview
+                    previewTable.innerHTML = '';
+                    
+                    // Create header row
+                    const headerRow = document.createElement('tr');
+                    headers.forEach(header => {
+                        const th = document.createElement('th');
+                        th.textContent = header;
+                        headerRow.appendChild(th);
+                    });
+                    previewTable.appendChild(headerRow);
+                    
+                    // Create data rows (limit to first 5 rows for preview)
+                    const previewData = data.slice(0, 5);
+                    previewData.forEach(row => {
+                        const tr = document.createElement('tr');
+                        headers.forEach(header => {
+                            const td = document.createElement('td');
+                            td.textContent = row[header] || '';
+                            tr.appendChild(td);
+                        });
+                        previewTable.appendChild(tr);
+                    });
+                    
+                    // Show preview container
+                    previewContainer.style.display = 'block';
+                    resultContainer.style.display = 'none';
+                }
+            });
+        });
+    </script>
+</body>
+</html>

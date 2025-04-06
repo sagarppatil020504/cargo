@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Storage Placement Manager</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <h1>📦 Storage Manager</h1>
+
+  <section class="form-section">
+    <h2>Add Item</h2>
+    <form id="itemForm">
+      <input name="name" placeholder="Item Name" required />
+      <input name="width" placeholder="Width" type="number" required />
+      <input name="depth" placeholder="Depth" type="number" required />
+      <input name="height" placeholder="Height" type="number" required />
+      <input name="priority" placeholder="Priority" type="number" required />
+      <input name="expiryDate" placeholder="Expiry Date (YYYY-MM-DD)" required />
+      <input name="usageLimit" placeholder="Usage Limit" type="number" required />
+      <input name="preferredZone" placeholder="Preferred Zone" required />
+      <button type="submit">Add Item</button>
+    </form>
+  </section>
+
+  <section class="form-section">
+    <h2>Add Container</h2>
+    <form id="containerForm">
+      <input name="containerId" placeholder="Container ID" required />
+      <input name="zone" placeholder="Zone" required />
+      <input name="width" placeholder="Width" type="number" required />
+      <input name="depth" placeholder="Depth" type="number" required />
+      <input name="height" placeholder="Height" type="number" required />
+      <button type="submit">Add Container</button>
+    </form>
+  </section>
+
+  <section>
+    <h2>Items</h2>
+    <ul id="itemsList"></ul>
+  </section>
+
+  <section>
+    <h2>Containers</h2>
+    <ul id="containersList"></ul>
+  </section>
+
+  <section>
+    <button onclick="triggerPlacement()">🧠 Run Placement</button>
+    <h2>Placements</h2>
+    <ul id="placementsList"></ul>
+  </section>
+
+  <script src="script.js"></script>
+</body>
+</html>

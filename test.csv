@@ -1,0 +1,11 @@
+itemId,name,width,depth,height,priority,expiryDate,usageLimit,preferredZone
+item001,Food Supply,2.0,2.0,1.0,1,2025-05-01,5,A
+item002,Medical Kit,1.5,1.0,0.5,2,2025-04-20,3,B
+item003,Oxygen Tank,1.0,1.0,2.0,1,2025-04-15,7,A
+item004,Tool Box,1.2,1.5,0.8,3,2026-01-01,10,C
+item005,Spare Parts,2.5,2.0,1.5,2,2025-12-12,8,B
+item006,Water Pack,1.0,1.0,1.0,1,2025-05-10,6,A
+item007,Battery Pack,1.5,1.5,0.5,2,2025-11-30,9,C
+item008,Blanket,2.0,1.0,0.3,3,2026-03-15,4,B
+item009,Portable Stove,1.3,1.0,0.7,2,2025-06-01,2,A
+item010,Communication Device,1.0,1.0,1.0,1,2025-08-20,1,C
