@@ -2,166 +2,361 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Item Management</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Item Search & Retrieval</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
   <style>
+    :root {
+      --primary: #2e7d32;
+      --secondary: #388e3c;
+      --light: #e8f5e9;
+      --dark: #1b5e20;
+      --error: #d32f2f;
+    }
+    
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f5f5f5;
       padding: 20px;
+      max-width: 1000px;
+      margin: 0 auto;
+      line-height: 1.6;
     }
-    h2 {
-      color: #333;
+    
+    h1, h2, h3 {
+      color: var(--dark);
     }
+    
+    .container {
+      max-width: 100%;
+    }
+    
     form {
-      background: #fff;
-      padding: 15px;
-      border-radius: 10px;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
       margin-bottom: 20px;
-      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     }
+    
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+      gap: 15px;
+    }
+    
     input, select {
-      padding: 8px;
-      margin: 5px 0;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
       width: 100%;
       box-sizing: border-box;
     }
+    
     button {
-      background-color: #007BFF;
+      background-color: var(--primary);
       color: white;
       padding: 10px 20px;
       border: none;
-      margin-top: 10px;
+      border-radius: 4px;
       cursor: pointer;
-    }
-    .result {
-      background: #fff;
-      padding: 10px;
-      border-left: 5px solid #007BFF;
+      transition: background-color 0.3s;
       margin-top: 10px;
+    }
+    
+    button:hover {
+      background-color: var(--dark);
+    }
+    
+    button:disabled {
+      background-color: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    .result {
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      margin-top: 10px;
+    }
+    
+    .item-card {
+      border-left: 4px solid var(--primary);
+      padding: 15px;
+      margin: 10px 0;
+    }
+    
+    .coordinates {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+      margin: 10px 0;
+    }
+    
+    .loader {
+      border: 4px solid var(--light);
+      border-top: 4px solid var(--primary);
+      border-radius: 50%;
+      width: 30px;
+      height: 30px;
+      animation: spin 1s linear infinite;
+      margin: 20px auto;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .toast {
+      position: fixed;
+      top: 20px;
+      right: 20px;
+      padding: 15px;
+      background: var(--primary);
+      color: white;
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+      z-index: 1000;
+      animation: fadeIn 0.3s;
+    }
+    
+    .toast.error {
+      background: var(--error);
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .error {
+      color: var(--error);
     }
   </style>
 </head>
 <body>
+  <h1><i class="fas fa-search"></i> Item Search & Retrieval</h1>
 
-  <h2>🔍 Search Item</h2>
-  <form id="searchForm">
-    <input type="text" id="itemId" placeholder="Item ID (optional)">
-    <input type="text" id="itemName" placeholder="Item Name (optional)">
-    <button type="submit">Search</button>
-  </form>
-  <div id="searchResult" class="result"></div>
+  <section>
+    <h2><i class="fas fa-search"></i> Search Item</h2>
+    <form id="searchForm">
+      <div class="form-grid">
+        <input type="text" id="itemId" placeholder="Item ID (optional)">
+        <input type="text" id="itemName" placeholder="Item Name (optional)">
+      </div>
+      <button type="submit" id="searchBtn">
+        <i class="fas fa-search"></i> Search
+      </button>
+    </form>
+    <div id="searchResult" class="result"></div>
+  </section>
 
-  <h2>📦 Retrieve Item</h2>
-  <form id="retrieveForm">
-    <input type="text" id="retrieveItemId" placeholder="Item ID" required>
-    <input type="text" id="retrieveUserId" placeholder="User ID" required>
-    <input type="datetime-local" id="retrieveTimestamp" required>
-    <button type="submit">Log Retrieval</button>
-  </form>
-  <div id="retrieveResult" class="result"></div>
+  <section>
+    <h2><i class="fas fa-box-open"></i> Retrieve Item</h2>
+    <form id="retrieveForm">
+      <div class="form-grid">
+        <input type="text" id="retrieveItemId" placeholder="Item ID" required>
+        <input type="text" id="retrieveUserId" placeholder="User ID" required>
+        <input type="datetime-local" id="retrieveTimestamp" required>
+      </div>
+      <button type="submit" id="retrieveBtn">
+        <i class="fas fa-clipboard-check"></i> Log Retrieval
+      </button>
+    </form>
+    <div id="retrieveResult" class="result"></div>
+  </section>
 
-  <h2>↩️ Place Item Back</h2>
-  <form id="placeForm">
-    <input type="text" id="placeItemId" placeholder="Item ID" required>
-    <input type="text" id="placeUserId" placeholder="User ID" required>
-    <input type="datetime-local" id="placeTimestamp" required>
-    <input type="text" id="containerId" placeholder="Container ID" required>
-    
-    <h4>Start Coordinates</h4>
-    <input type="number" step="any" id="startWidth" placeholder="Start Width">
-    <input type="number" step="any" id="startDepth" placeholder="Start Depth">
-    <input type="number" step="any" id="startHeight" placeholder="Start Height">
-    
-    <h4>End Coordinates</h4>
-    <input type="number" step="any" id="endWidth" placeholder="End Width">
-    <input type="number" step="any" id="endDepth" placeholder="End Depth">
-    <input type="number" step="any" id="endHeight" placeholder="End Height">
+  <section>
+    <h2><i class="fas fa-undo"></i> Place Item Back</h2>
+    <form id="placeForm">
+      <div class="form-grid">
+        <input type="text" id="placeItemId" placeholder="Item ID" required>
+        <input type="text" id="placeUserId" placeholder="User ID" required>
+        <input type="datetime-local" id="placeTimestamp" required>
+        <input type="text" id="containerId" placeholder="Container ID" required>
+      </div>
+      
+      <h3>Start Coordinates</h3>
+      <div class="coordinates">
+        <input type="number" step="any" id="startWidth" placeholder="Width" required>
+        <input type="number" step="any" id="startDepth" placeholder="Depth" required>
+        <input type="number" step="any" id="startHeight" placeholder="Height" required>
+      </div>
+      
+      <h3>End Coordinates</h3>
+      <div class="coordinates">
+        <input type="number" step="any" id="endWidth" placeholder="Width" required>
+        <input type="number" step="any" id="endDepth" placeholder="Depth" required>
+        <input type="number" step="any" id="endHeight" placeholder="Height" required>
+      </div>
 
-    <button type="submit">Place Back</button>
-  </form>
-  <div id="placeResult" class="result"></div>
+      <button type="submit" id="placeBtn">
+        <i class="fas fa-save"></i> Place Back
+      </button>
+    </form>
+    <div id="placeResult" class="result"></div>
+  </section>
 
   <script>
-    const baseUrl = "http://localhost:8000"; // Update if hosted elsewhere
+    const baseUrl = "http://localhost:8000";
+    
+    // Toast notification
+    function showToast(message, isError = false) {
+      const toast = document.createElement('div');
+      toast.className = `toast ${isError ? 'error' : ''}`;
+      toast.innerHTML = `<i class="fas ${isError ? 'fa-exclamation-circle' : 'fa-check-circle'}"></i> ${message}`;
+      document.body.appendChild(toast);
+      
+      setTimeout(() => {
+        toast.remove();
+      }, 3000);
+    }
 
     // Search
     document.getElementById("searchForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const itemId = document.getElementById("itemId").value;
-      const itemName = document.getElementById("itemName").value;
-
-      const url = new URL(`${baseUrl}/search`);
-      if (itemId) url.searchParams.append("itemId", itemId);
-      if (itemName) url.searchParams.append("itemName", itemName);
-
-      const res = await fetch(url);
-      const data = await res.json();
-
+      const searchBtn = document.getElementById("searchBtn");
       const resultDiv = document.getElementById("searchResult");
-      if (data.found) {
-        resultDiv.innerHTML = `
-          <strong>Item Found:</strong><br>
-          ID: ${data.item.itemId}<br>
-          Name: ${data.item.name}<br>
-          Zone: ${data.item.zone}<br>
-          Container: ${data.item.containerId}<br>
-          Start: ${JSON.stringify(data.item.position.startCoordinates)}<br>
-          End: ${JSON.stringify(data.item.position.endCoordinates)}<br>
-          <br><strong>Steps:</strong><br>
-          ${data.retrievalSteps.map(s => `Step ${s.step}: ${s.action}`).join("<br>")}
-        `;
-      } else {
-        resultDiv.innerHTML = "<strong>No item found.</strong>";
+      
+      try {
+        searchBtn.disabled = true;
+        resultDiv.innerHTML = '<div class="loader"></div>';
+        
+        const itemId = document.getElementById("itemId").value;
+        const itemName = document.getElementById("itemName").value;
+
+        if (!itemId && !itemName) {
+          throw new Error("Please provide either Item ID or Name");
+        }
+
+        const url = new URL(`${baseUrl}/search`);
+        if (itemId) url.searchParams.append("itemId", itemId);
+        if (itemName) url.searchParams.append("itemName", itemName);
+
+        const res = await fetch(url);
+        if (!res.ok) throw new Error(await res.text());
+        
+        const data = await res.json();
+
+        if (data.found) {
+          resultDiv.innerHTML = `
+            <div class="item-card">
+              <h3><i class="fas fa-box"></i> ${data.item.name}</h3>
+              <p><strong>ID:</strong> ${data.item.itemId}</p>
+              <p><strong>Container:</strong> ${data.item.containerId}</p>
+              <p><strong>Zone:</strong> ${data.item.zone}</p>
+              
+              <h4>Position</h4>
+              <p><strong>Start:</strong> W:${data.item.position.startCoordinates.width}, 
+                D:${data.item.position.startCoordinates.depth}, 
+                H:${data.item.position.startCoordinates.height}</p>
+              <p><strong>End:</strong> W:${data.item.position.endCoordinates.width}, 
+                D:${data.item.position.endCoordinates.depth}, 
+                H:${data.item.position.endCoordinates.height}</p>
+              
+              <h4>Retrieval Steps</h4>
+              <ol>
+                ${data.retrievalSteps.map(s => `<li>${s.action} ${s.itemName}</li>`).join('')}
+              </ol>
+            </div>
+          `;
+          showToast("Item found successfully!");
+        } else {
+          resultDiv.innerHTML = "<p>No item found matching your criteria.</p>";
+        }
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">${error.message}</p>`;
+        showToast(error.message, true);
+      } finally {
+        searchBtn.disabled = false;
       }
     });
 
     // Retrieve
     document.getElementById("retrieveForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const payload = {
-        itemId: document.getElementById("retrieveItemId").value,
-        userId: document.getElementById("retrieveUserId").value,
-        timestamp: document.getElementById("retrieveTimestamp").value
-      };
+      const retrieveBtn = document.getElementById("retrieveBtn");
+      const resultDiv = document.getElementById("retrieveResult");
+      
+      try {
+        retrieveBtn.disabled = true;
+        resultDiv.innerHTML = '<div class="loader"></div>';
 
-      const res = await fetch(`${baseUrl}/retrieve`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      document.getElementById("retrieveResult").innerText = data.message;
+        const payload = {
+          itemId: document.getElementById("retrieveItemId").value,
+          userId: document.getElementById("retrieveUserId").value,
+          timestamp: document.getElementById("retrieveTimestamp").value
+        };
+
+        const res = await fetch(`${baseUrl}/retrieve`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) throw new Error(await res.text());
+        
+        const data = await res.json();
+        resultDiv.innerHTML = `<p>${data.message}</p>`;
+        showToast("Retrieval logged successfully!");
+        e.target.reset();
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">${error.message}</p>`;
+        showToast(error.message, true);
+      } finally {
+        retrieveBtn.disabled = false;
+      }
     });
 
     // Place Back
     document.getElementById("placeForm").addEventListener("submit", async (e) => {
       e.preventDefault();
-      const payload = {
-        itemId: document.getElementById("placeItemId").value,
-        userId: document.getElementById("placeUserId").value,
-        timestamp: document.getElementById("placeTimestamp").value,
-        containerId: document.getElementById("containerId").value,
-        position: {
-          startCoordinates: {
-            width: parseFloat(document.getElementById("startWidth").value),
-            depth: parseFloat(document.getElementById("startDepth").value),
-            height: parseFloat(document.getElementById("startHeight").value),
-          },
-          endCoordinates: {
-            width: parseFloat(document.getElementById("endWidth").value),
-            depth: parseFloat(document.getElementById("endDepth").value),
-            height: parseFloat(document.getElementById("endHeight").value),
-          }
-        }
-      };
+      const placeBtn = document.getElementById("placeBtn");
+      const resultDiv = document.getElementById("placeResult");
+      
+      try {
+        placeBtn.disabled = true;
+        resultDiv.innerHTML = '<div class="loader"></div>';
 
-      const res = await fetch(`${baseUrl}/place`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      const data = await res.json();
-      document.getElementById("placeResult").innerText = data.message;
+        const payload = {
+          itemId: document.getElementById("placeItemId").value,
+          userId: document.getElementById("placeUserId").value,
+          timestamp: document.getElementById("placeTimestamp").value,
+          containerId: document.getElementById("containerId").value,
+          position: {
+            startCoordinates: {
+              width: parseFloat(document.getElementById("startWidth").value),
+              depth: parseFloat(document.getElementById("startDepth").value),
+              height: parseFloat(document.getElementById("startHeight").value),
+            },
+            endCoordinates: {
+              width: parseFloat(document.getElementById("endWidth").value),
+              depth: parseFloat(document.getElementById("endDepth").value),
+              height: parseFloat(document.getElementById("endHeight").value),
+            }
+          }
+        };
+
+        const res = await fetch(`${baseUrl}/place`, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) throw new Error(await res.text());
+        
+        const data = await res.json();
+        resultDiv.innerHTML = `<p>${data.message}</p>`;
+        showToast("Item placed back successfully!");
+        e.target.reset();
+      } catch (error) {
+        resultDiv.innerHTML = `<p class="error">${error.message}</p>`;
+        showToast(error.message, true);
+      } finally {
+        placeBtn.disabled = false;
+      }
     });
   </script>
 </body>

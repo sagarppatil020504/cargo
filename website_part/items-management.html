@@ -1,56 +1,291 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Storage Placement Manager</title>
-  <link rel="stylesheet" href="style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Storage Placement Manager</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #2e7d32;
+            --secondary: #388e3c;
+            --light: #e8f5e9;
+            --dark: #1b5e20;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        h1, h2 {
+            color: var(--dark);
+        }
+        
+        .form-section {
+            background: white;
+            padding: 20px;
+            margin-bottom: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        form {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 15px;
+        }
+        
+        input, button {
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        
+        button {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        
+        button:hover {
+            background-color: var(--dark);
+        }
+        
+        .loader {
+            border: 4px solid var(--light);
+            border-top: 4px solid var(--primary);
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        #itemsList, #containersList, #placementsList {
+            list-style: none;
+            padding: 0;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+        }
+        
+        .card {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px;
+            background: var(--primary);
+            color: white;
+            border-radius: 4px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
 </head>
 <body>
-  <h1>📦 Storage Manager</h1>
+    <div class="container">
+        <h1><i class="fas fa-boxes"></i> Storage Manager</h1>
 
-  <section class="form-section">
-    <h2>Add Item</h2>
-    <form id="itemForm">
-      <input name="name" placeholder="Item Name" required />
-      <input name="width" placeholder="Width" type="number" required />
-      <input name="depth" placeholder="Depth" type="number" required />
-      <input name="height" placeholder="Height" type="number" required />
-      <input name="priority" placeholder="Priority" type="number" required />
-      <input name="expiryDate" placeholder="Expiry Date (YYYY-MM-DD)" required />
-      <input name="usageLimit" placeholder="Usage Limit" type="number" required />
-      <input name="preferredZone" placeholder="Preferred Zone" required />
-      <button type="submit">Add Item</button>
-    </form>
-  </section>
+        <section class="form-section">
+            <h2><i class="fas fa-plus"></i> Add Item</h2>
+            <form id="itemForm">
+                <input name="name" placeholder="Item Name" required>
+                <input name="width" type="number" placeholder="Width" min="1" required>
+                <input name="depth" type="number" placeholder="Depth" min="1" required>
+                <input name="height" type="number" placeholder="Height" min="1" required>
+                <input name="priority" type="number" placeholder="Priority" min="1" required>
+                <input name="expiryDate" type="date" placeholder="Expiry Date" required>
+                <input name="usageLimit" type="number" placeholder="Usage Limit" min="1" required>
+                <input name="preferredZone" placeholder="Preferred Zone" required>
+                <button type="submit">Add Item</button>
+            </form>
+        </section>
 
-  <section class="form-section">
-    <h2>Add Container</h2>
-    <form id="containerForm">
-      <input name="containerId" placeholder="Container ID" required />
-      <input name="zone" placeholder="Zone" required />
-      <input name="width" placeholder="Width" type="number" required />
-      <input name="depth" placeholder="Depth" type="number" required />
-      <input name="height" placeholder="Height" type="number" required />
-      <button type="submit">Add Container</button>
-    </form>
-  </section>
+        <section class="form-section">
+            <h2><i class="fas fa-box"></i> Add Container</h2>
+            <form id="containerForm">
+                <input name="containerId" placeholder="Container ID" required>
+                <input name="zone" placeholder="Zone" required>
+                <input name="width" type="number" placeholder="Width" min="1" required>
+                <input name="depth" type="number" placeholder="Depth" min="1" required>
+                <input name="height" type="number" placeholder="Height" min="1" required>
+                <button type="submit">Add Container</button>
+            </form>
+        </section>
 
-  <section>
-    <h2>Items</h2>
-    <ul id="itemsList"></ul>
-  </section>
+        <section>
+            <h2><i class="fas fa-box-open"></i> Items</h2>
+            <ul id="itemsList"></ul>
+        </section>
 
-  <section>
-    <h2>Containers</h2>
-    <ul id="containersList"></ul>
-  </section>
+        <section>
+            <h2><i class="fas fa-pallet"></i> Containers</h2>
+            <ul id="containersList"></ul>
+        </section>
 
-  <section>
-    <button onclick="triggerPlacement()">🧠 Run Placement</button>
-    <h2>Placements</h2>
-    <ul id="placementsList"></ul>
-  </section>
+        <section>
+            <button id="runPlacement" class="run-placement-btn">
+                <i class="fas fa-brain"></i> Run Placement
+            </button>
+            <h2><i class="fas fa-map-marked-alt"></i> Placements</h2>
+            <ul id="placementsList"></ul>
+        </section>
+    </div>
 
-  <script src="script.js"></script>
+    <script src="js/items-management.js"></script>
+    <script>
+        // Initialize API client
+        const api = new ItemManagementAPI();
+        const ui = new ItemManagementUI();
+
+        // DOM Elements
+        const itemsList = document.getElementById('itemsList');
+        const containersList = document.getElementById('containersList');
+        const placementsList = document.getElementById('placementsList');
+        const runPlacementBtn = document.getElementById('runPlacement');
+
+        // Toast notification
+        function showToast(message, isError = false) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${isError ? 'error' : ''}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            
+            setTimeout(() => {
+                toast.remove();
+            }, 3000);
+        }
+
+        // Load initial data
+        async function loadData() {
+            try {
+                ui.showLoader(itemsList);
+                ui.showLoader(containersList);
+                
+                const [items, containers] = await Promise.all([
+                    api.getItems(),
+                    api.getContainers()
+                ]);
+
+                ui.updateList(itemsList, items, item => `
+                    <li class="card">
+                        <h3>${item.name}</h3>
+                        <p>Dimensions: ${item.width}x${item.depth}x${item.height}</p>
+                        <p>Zone: ${item.preferredZone}</p>
+                    </li>
+                `);
+
+                ui.updateList(containersList, containers, container => `
+                    <li class="card">
+                        <h3>${container.containerId}</h3>
+                        <p>Zone: ${container.zone}</p>
+                        <p>Capacity: ${container.width}x${container.depth}x${container.height}</p>
+                    </li>
+                `);
+            } catch (error) {
+                showToast(error.message, true);
+            }
+        }
+
+        // Form handlers
+        async function handleItemSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const itemData = Object.fromEntries(formData.entries());
+            
+            try {
+                await api.addItem(itemData);
+                showToast('Item added successfully!');
+                loadData();
+                e.target.reset();
+            } catch (error) {
+                showToast(error.message, true);
+            }
+        }
+
+        async function handleContainerSubmit(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const containerData = Object.fromEntries(formData.entries());
+            
+            try {
+                await api.addContainer(containerData);
+                showToast('Container added successfully!');
+                loadData();
+                e.target.reset();
+            } catch (error) {
+                showToast(error.message, true);
+            }
+        }
+
+        async function handleRunPlacement() {
+            try {
+                runPlacementBtn.disabled = true;
+                const result = await api.runPlacement();
+                showToast('Placement completed successfully!');
+                loadPlacements();
+            } catch (error) {
+                showToast(error.message, true);
+            } finally {
+                runPlacementBtn.disabled = false;
+            }
+        }
+
+        async function loadPlacements() {
+            try {
+                ui.showLoader(placementsList);
+                const placements = await api.getPlacements();
+                
+                ui.updateList(placementsList, placements, placement => `
+                    <li class="card">
+                        <h3>${placement.itemId}</h3>
+                        <p>Container: ${placement.containerId}</p>
+                        <p>Position: ${placement.position}</p>
+                    </li>
+                `);
+            } catch (error) {
+                showToast(error.message, true);
+            }
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            loadPlacements();
+            
+            document.getElementById('itemForm').addEventListener('submit', handleItemSubmit);
+            document.getElementById('containerForm').addEventListener('submit', handleContainerSubmit);
+            runPlacementBtn.addEventListener('click', handleRunPlacement);
+        });
+    </script>
 </body>
 </html>
